@@ -6,7 +6,7 @@ target/debug/my_program:
 	cargo build
 
 run: target/debug/my_program
-	../target/debug/rustEditor
+	../target/debug/rust-editor
 
 clean:
 	cargo clean
