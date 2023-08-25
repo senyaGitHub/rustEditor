@@ -3,10 +3,17 @@ use termion::event::Key;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+pub struct Position {
+	pub x: usize,
+	pub y: usize,
+}
+
 pub struct Editor {
     should_quit: bool,
     terminal: Terminal,
+    cursor_position: Position,
 }
+
 
 impl Editor {
     pub fn run(&mut self) {
@@ -27,19 +34,20 @@ impl Editor {
         Self {
             should_quit: false,
             // if everithing ok returns terminal, otherwise str
-            terminal: Terminal::default().expect("Failed to initialize terminal"), 
+            terminal: Terminal::default().expect("Failed to initialize terminal"),
+            cursor_position: Position {x: 0, y: 0}, 
         }
     }
 
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
     	Terminal::cursor_hide();
-        Terminal::cursor_position(0, 0);
+        Terminal::cursor_position(&Position {x: 0, y: 0});
         if self.should_quit {
         	Terminal::clear_screen();
             println!("Goodbye.\r");
         } else {
             self.draw_rows();
-            Terminal::cursor_position(0, 0);
+            Terminal::cursor_position(&self.cursor_position);
         }
         Terminal::cursor_show();
         Terminal::flush()
@@ -50,16 +58,32 @@ impl Editor {
 
         	// key to quit
             Key::Ctrl('q') => self.should_quit = true,
-            _ => (),
+            Key::Up | Key::Down | Key::Left | Key::Right => self.move_cursor(pressed_key),
+            _ => (), // This is the catch-all case for any key that isn't Ctrl('q')
         }
         return Ok(());
     }
+    fn move_cursor(&mut self, key: Key){
+    	let Position {mut y, mut x} = self.cursor_position;
+    	match key {
+    		Key::Up => y = y.saturating_sub(1),
+          	Key::Down => y = y.saturating_add(1),
+          	Key::Left => x = x.saturating_sub(1),
+          	Key::Right => x = x.saturating_add(1), 
+			_ => (), // This is the catch-all case for any key that isn't up down left or right
+    	}
+    	return self.cursor_position = Position{x,y}
+    }
+
+
+
+
 
     fn draw_welcome_message(&self){
     	let mut welcome_message = format!("RustEditor -- version {}", VERSION);
     	let width = self.terminal.size().width as usize;
     	let len = welcome_message.len();
-    	let padding = width.saturating_add(len) / 2;
+    	let padding = (width.saturating_sub(len)) / 2;
     	let space = " ".repeat(padding.saturating_add(1));
 
     	welcome_message = format!("~{}{}", space, welcome_message);
