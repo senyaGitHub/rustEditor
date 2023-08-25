@@ -1,6 +1,8 @@
 use crate::Terminal;
 use termion::event::Key;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 pub struct Editor {
     should_quit: bool,
     terminal: Terminal,
@@ -8,7 +10,8 @@ pub struct Editor {
 
 impl Editor {
     pub fn run(&mut self) {
-        loop {
+    	// main loop
+        loop { 
             if let Err(error) = self.refresh_screen() {
                 die(error);
             }
@@ -23,7 +26,8 @@ impl Editor {
     pub fn default() -> Self {
         Self {
             should_quit: false,
-            terminal: Terminal::default().expect("Failed to initialize terminal"),
+            // if everithing ok returns terminal, otherwise str
+            terminal: Terminal::default().expect("Failed to initialize terminal"), 
         }
     }
 
@@ -43,21 +47,44 @@ impl Editor {
     fn process_keypress(&mut self) -> Result<(), std::io::Error> {
         let pressed_key = Terminal::read_key()?;
         match pressed_key {
+
+        	// key to quit
             Key::Ctrl('q') => self.should_quit = true,
             _ => (),
         }
-        Ok(())
+        return Ok(());
     }
+
+    fn draw_welcome_message(&self){
+    	let mut welcome_message = format!("RustEditor -- version {}", VERSION);
+    	let width = self.terminal.size().width as usize;
+    	let len = welcome_message.len();
+    	let padding = width.saturating_add(len) / 2;
+    	let space = " ".repeat(padding.saturating_add(1));
+
+    	welcome_message = format!("~{}{}", space, welcome_message);
+    	welcome_message.truncate(width);
+    	println!("{}\r", welcome_message);
+ 
+    }
+
+
+
+
     fn draw_rows(&self) {
-        for _ in 0..self.terminal.size().height - 1 {
-        	Terminal::clear_current_line();
-            println!("~\r");
-        }
-        println!("{}", self.terminal.size().height);
+    	let height = self.terminal.size().height;
+    	for row in 0..height - 1 {
+    		Terminal::clear_current_line();
+    		if row == height / 3 {
+    			self.draw_welcome_message();
+    		} else {
+    			println!("~\r");
+    		}
+    	}
+	}
 
-
-    }
 }
+
 
 fn die(e: std::io::Error) {
     Terminal::clear_screen();
