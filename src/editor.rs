@@ -58,7 +58,14 @@ impl Editor {
 
         	// key to quit
             Key::Ctrl('q') => self.should_quit = true,
-            Key::Up | Key::Down | Key::Left | Key::Right => self.move_cursor(pressed_key),
+            Key::Up 
+            | Key::Down 
+            | Key::Left 
+            | Key::Right 
+            | Key::PageUp
+            | Key::PageDown
+            | Key::End
+            | Key::Home => self.move_cursor(pressed_key),
             _ => (), // This is the catch-all case for any key that isn't Ctrl('q')
         }
         return Ok(());
@@ -81,14 +88,15 @@ impl Editor {
           		x = x.saturating_add(1);
           	}
           }
+          Key::PageUp => y = 0,
+          Key::PageDown => y = height,
+          Key::Home => x = 0,
+          Key::End => x = width,
 			_ => (), // This is the catch-all case for any key that isn't up down left or right
           	
     	}
     	return self.cursor_position = Position{x,y}
     }
-
-
-
 
 
     fn draw_welcome_message(&self){
@@ -103,7 +111,6 @@ impl Editor {
     	println!("{}\r", welcome_message);
  
     }
-
 
 
 
