@@ -1,11 +1,11 @@
 .PHONY: all run clean
 
-all: target/debug/my_program
+all: target/debug/rust-editor
 
-target/debug/my_program:
+target/debug/rust-editor:
 	cargo build
 
-run: target/debug/my_program
+run: target/debug/rust-editor
 	../target/debug/rust-editor
 
 clean:
