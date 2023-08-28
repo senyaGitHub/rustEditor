@@ -18,4 +18,10 @@ impl Row{
 		let start = cmp::min(start, end);
 		return self.string.get(start..end).unwrap_or_default().to_string();
 	}
+	pub fn len(&self) -> usize {
+		return self.string.len();
+	}
+	pub fn is_empty(&self) -> bool {
+		return self.string.is_empty();
+	}
 }
