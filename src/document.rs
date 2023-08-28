@@ -20,6 +20,9 @@ impl Document{
 		return self.rows.get(index); // if index out of bouce return None
 	}
 	pub fn is_empty(&self) -> bool {
-		self.rows.is_empty()
+		return self.rows.is_empty();
+	}
+	pub fn len(&self) -> usize{
+		return self.rows.len();
 	}
 }
