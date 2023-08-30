@@ -17,6 +17,8 @@ pub struct Position {
     pub y: usize,
 }
 
+
+// bexause StatusMessgae is impl, we use from() to create instance of StatusMessage
 struct StatusMessage {
     text: String,
     time: Instant,
@@ -37,6 +39,7 @@ pub struct Editor {
     offset: Position,
     document: Document,
     status_message: StatusMessage,
+    last_message_time: Instant
 }
 
 impl Editor {
@@ -55,7 +58,7 @@ impl Editor {
     }
     pub fn default() -> Self {
         let args: Vec<String> = env::args().collect();
-        let mut initial_status = String::from("quit: ctrl-q");
+        let mut initial_status = String::from("quit: ctrl-q | save: ctrl-s");
         let document = if args.len() > 1 {
             let file_name = &args[1];
             let doc = Document::open(&file_name);
@@ -76,6 +79,8 @@ impl Editor {
             cursor_position: Position::default(),
             offset: Position::default(),
             status_message: StatusMessage::from(initial_status),
+            last_message_time: Instant::now(),
+
         }
     }
 
@@ -101,12 +106,19 @@ impl Editor {
         let pressed_key = Terminal::read_key()?;
         match pressed_key {
             Key::Ctrl('q') => self.should_quit = true,
+            Key::Ctrl('s') => {
+                if self.document.save().is_ok(){
+                    self.status_message =
+                        StatusMessage::from("File saved.".to_string());
+                }
+                self.last_message_time = Instant::now();
+            }
             Key::Char(c) => {
                 self.document.insert(&self.cursor_position, c);
                 self.move_cursor(Key::Right);
             }
             Key::Delete => self.document.delete(&self.cursor_position),
-            Key::Backspace => {
+            Key::Backspace | Key::Ctrl('h') => {
                 if self.cursor_position.x > 0 || self.cursor_position.y > 0 {
                     self.move_cursor(Key::Left);
                     self.document.delete(&self.cursor_position);
@@ -261,7 +273,7 @@ impl Editor {
         Terminal::set_fg_color(STATUS_FG_COLOR);
         println!("{}\r", status);
         Terminal::reset_fg_color();
-        Terminal::reset_bg_color();;
+        Terminal::reset_bg_color();
     }
     fn draw_message_bar(&self) {
         Terminal::clear_current_line();
@@ -270,6 +282,11 @@ impl Editor {
             let mut text = message.text.clone();
             text.truncate(self.terminal.size().width as usize);
             print!("{}", text);
+        } else {
+            let width = self.terminal.size().width as usize;
+            let mut initial_status = String::from("quit: ctrl-q | save: ctrl-s");
+            initial_status.truncate(width);
+            print!("{}", initial_status); 
         }
     }
 }

@@ -81,6 +81,9 @@ impl Row {
         self.string = format!("{}{}", self.string, new.string);
         self.update_len();
     }
+    pub fn as_bytes(&self) -> &[u8]{
+    	return self.string.as_bytes();
+    }
 
 }
 
