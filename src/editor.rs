@@ -102,17 +102,27 @@ impl Editor {
         Terminal::cursor_show();
         Terminal::flush()
     }
+    fn save(&mut self) {
+        if self.document.file_name.is_none(){
+            let new_name = self.prompt_save("Save as: ").unwrap_or(None);
+            if new_name.is_none(){
+                self.status_message = StatusMessage::from("Save aborted".to_string());
+                return;
+            }
+            self.document.file_name = new_name;
+        }
+        if self.document.save().is_ok(){
+            self.status_message = StatusMessage::from("File saved.".to_string());
+            self.last_message_time = Instant::now();
+        } else {
+            self.status_message = StatusMessage::from("Error writing file".to_string());
+        }
+    }
     fn process_keypress(&mut self) -> Result<(), std::io::Error> {
         let pressed_key = Terminal::read_key()?;
         match pressed_key {
             Key::Ctrl('q') => self.should_quit = true,
-            Key::Ctrl('s') => {
-                if self.document.save().is_ok(){
-                    self.status_message =
-                        StatusMessage::from("File saved.".to_string());
-                }
-                self.last_message_time = Instant::now();
-            }
+            Key::Ctrl('s') => self.save(),
             Key::Char(c) => {
                 self.document.insert(&self.cursor_position, c);
                 self.move_cursor(Key::Right);
@@ -288,6 +298,36 @@ impl Editor {
             initial_status.truncate(width);
             print!("{}", initial_status); 
         }
+    }
+    fn prompt_save(&mut self, prompt: &str) -> Result<Option<String>, std::io::Error> {
+        let mut result = String::new();
+        loop {
+            self.status_message = StatusMessage::from(format!("{}{}", prompt, result));
+            self.refresh_screen()?;
+            match Terminal::read_key()? {
+                Key::Backspace => {
+                    if !result.is_empty() {
+                        result.truncate(result.len() - 1);
+                    }
+                }
+                Key::Char('\n') => break,
+                Key::Char(c) => {
+                    if !c.is_control() {
+                        result.push(c);
+                    }
+                }
+                Key::Esc => {
+                    result.truncate(0);
+                    break;
+                }
+                _ => (),
+            }
+        }
+        self.status_message = StatusMessage::from(String::new());
+        if result.is_empty() {
+            return Ok(None);
+        }
+        return Ok(Some(result));
     }
 }
 
