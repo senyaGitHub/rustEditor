@@ -5,6 +5,7 @@ use std::fs;
 
 pub struct Document {
 	rows: Vec<Row>,
+	pub file_name: Option<String>,
 }
 
 impl Document{
@@ -14,7 +15,7 @@ impl Document{
 		for value in contents.lines(){
 			rows.push(Row::from(value));
 		}
-		return Ok(Self{rows});
+		return Ok(Self{rows, file_name: Some(filename.to_string())});
 	}
 	pub fn row(&self, index: usize) -> Option<&Row>{
 		return self.rows.get(index); // if index out of bouce return None
