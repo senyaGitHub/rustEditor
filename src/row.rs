@@ -70,6 +70,11 @@ impl Row {
     	}
     	self.update_len();
     }
+    pub fn append(&mut self, new: &Self) {
+        self.string = format!("{}{}", self.string, new.string);
+        self.update_len();
+    }
+
 }
 
 
