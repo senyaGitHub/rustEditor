@@ -305,7 +305,7 @@ impl Editor {
             self.status_message = StatusMessage::from(format!("{}{}", prompt, result));
             self.refresh_screen()?;
             match Terminal::read_key()? {
-                Key::Backspace => {
+                Key::Backspace | Key::Ctrl('h') => {
                     if !result.is_empty() {
                         result.truncate(result.len() - 1);
                     }
