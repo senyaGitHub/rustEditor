@@ -62,11 +62,10 @@ impl Editor {
     pub fn default() -> Self {
         let args: Vec<String> = env::args().collect();
         let mut initial_status = String::from("quit: ctrl-q | save: ctrl-s");
-        let document = if args.len() > 1 {
-            let file_name = &args[1];
+        let document = if let Some(file_name) = args.get(1) {
             let doc = Document::open(file_name);
-            if doc.is_ok() {
-                doc.unwrap()
+            if let Ok(doc) = doc {
+                doc
             } else {
                 initial_status = format!("ERR: Could not open file: {file_name}");
                 Document::default()
@@ -116,7 +115,7 @@ impl Editor {
             self.document.file_name = new_name;
         }
         if self.document.save().is_ok(){
-            self.status_message = StatusMessage::from("File saved.".to_string());
+            self.status_message = StatusMessage::from("File saved. :3".to_string());
             self.last_message_time = Instant::now();
         } else {
             self.status_message = StatusMessage::from("Error writing file".to_string());
@@ -248,6 +247,7 @@ impl Editor {
         let mut welcome_message = format!("RustEditor -- version {VERSION} :)");
         let width = self.terminal.size().width as usize;
         let len = welcome_message.len();
+        #[allow(clippy::integer_arithmetic, clippy::integer_division)]
         let padding = width.saturating_sub(len) / 2;
         let spaces = " ".repeat(padding.saturating_sub(1));
         welcome_message = format!("~{spaces}{welcome_message}");
@@ -261,11 +261,15 @@ impl Editor {
         let row = row.render(start, end);
         println!("{row}\r");
     }
+    #[allow(clippy::integer_division, clippy::integer_arithmetic)]
     fn draw_rows(&self) {
         let height = self.terminal.size().height;
         for terminal_row in 0..height {
             Terminal::clear_current_line();
-            if let Some(row) = self.document.row(self.offset.y.saturating_add(terminal_row as usize)) {
+            if let Some(row) = self
+            .document
+            .row(self.offset.y.saturating_add(terminal_row as usize))
+            {
                 self.draw_row(row);
             } else if self.document.is_empty() && terminal_row == height / 3 {
                 self.draw_welcome_message();
