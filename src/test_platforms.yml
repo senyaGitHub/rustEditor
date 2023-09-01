@@ -1,0 +1,28 @@
+name: Test on Different Platforms
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build and Test on Ubuntu
+      run: |
+        docker build -f ubuntu.Dockerfile -t my_editor_ubuntu .
+        docker run my_editor_ubuntu
+
+  test-centos:
+    runs-on: centos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build and Test on CentOS
+      run: |
+        docker build -f centos.Dockerfile -t my_editor_centos .
+        docker run my_editor_centos

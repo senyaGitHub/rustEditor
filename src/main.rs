@@ -7,7 +7,7 @@
     clippy::else_if_without_else,
     clippy::shadow_reuse,
 )]
-
+#![allow(non_snake_case)]
 
 
 mod editor;
