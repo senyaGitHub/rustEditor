@@ -1,6 +1,7 @@
 name: Test on Different Platforms
 
-on: [push]
+on:
+  push:
 
 jobs:
   test:
@@ -10,11 +11,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-  - name: Build and Test on Ubuntu
-    run: |
-      cd ..
-      docker build -f dockerfiles/ubuntu.Dockerfile -t my_editor_ubuntu .
-      docker run my_editor_ubuntu
+    - name: Build and Test on Ubuntu
+      run: |
+        cd ..
+        docker build -f dockerfiles/ubuntu.Dockerfile -t my_editor_ubuntu .
+        docker run my_editor_ubuntu
 
   test-centos:
     runs-on: centos-latest
@@ -22,9 +23,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-  
-  - name: Build and Test on centOs
-    run: |
-      cd ..
-      docker build -f dockerfiles/centos.Dockerfile -t my_editor_centos .
-      docker run my_editor_centos
+
+    - name: Build and Test on centOs
+      run: |
+        cd ..
+        docker build -f dockerfiles/centos.Dockerfile -t my_editor_centos .
+        docker run my_editor_centos
