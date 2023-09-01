@@ -1,6 +1,6 @@
 FROM rust:latest as builder
 WORKDIR /app
-COPY . .
+COPY ../ /app
 RUN cargo build --release
 
 FROM ubuntu:latest
