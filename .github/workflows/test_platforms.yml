@@ -12,6 +12,7 @@ jobs:
 
     - name: Build and Test on Ubuntu
       run: |
+        cd dockerfiles
         docker build -f ubuntu.Dockerfile -t my_editor_ubuntu .
         docker run my_editor_ubuntu
 
