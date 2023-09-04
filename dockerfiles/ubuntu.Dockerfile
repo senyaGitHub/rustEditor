@@ -9,6 +9,7 @@ RUN mkdir /app/project
 COPY . /app/project
 
 # Build the project
+RUN cd /app/project
 RUN cargo build --release
 
 # Final stage
